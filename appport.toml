@@ -1,0 +1,84 @@
+# AppPort application contract
+version = "1"
+
+[application]
+name = "nextjs-full-stack-template"
+description = "FeltDB-first Next.js starter"
+runtime = "node"
+
+[deployment]
+mode = "local"
+storage = "durable"
+distributed = true
+
+[state]
+enabled = true
+authority = "feltdb"
+namespace = "nextjs-full-stack-template"
+
+[tenant]
+mode = "required"
+default = "demo"
+
+[http]
+enabled = false
+host = "127.0.0.1"
+port = 8787
+
+[cors]
+enabled = true
+origins = ["*"]
+
+[api]
+enabled = true
+
+[api.keys]
+enabled = true
+scopes = ["orders.read", "orders.create", "orders.update"]
+
+[webhooks]
+enabled = true
+
+[webhooks.delivery]
+enabled = true
+retries = 3
+timeout_ms = 10000
+
+[webhooks.events]
+allowed = ["orders.created"]
+
+[jobs]
+enabled = true
+
+[jobs.execution]
+enabled = true
+max_attempts = 3
+
+[jobs.types]
+"orders.fulfill" = { timeout_ms = 30000 }
+
+[events]
+enabled = true
+
+[events.streaming]
+enabled = true
+transport = "sse"
+
+[authorization]
+enabled = true
+default = "deny"
+
+[observability]
+enabled = true
+
+[lifecycle]
+managed = true
+
+[development]
+mail = "local"
+webhooks = "local"
+jobs = "local"
+
+use api
+use webhooks
+use jobs
