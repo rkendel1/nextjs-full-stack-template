@@ -1,0 +1,1 @@
+# nextjs-full-stack-template
