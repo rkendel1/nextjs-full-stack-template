@@ -1,0 +1,229 @@
+flow_version 1
+
+app nextjs-full-stack-template {
+  collection ApiKeys {
+    id: uuid
+    tenant_id: text
+    name: text
+    key_prefix: text
+    secret_hash: text
+    scopes: text
+    created_at: datetime
+    expires_at: datetime
+    revoked_at: datetime
+    last_used_at: datetime
+    created_by: text
+    index tenant_idx using hash (tenant_id)
+    index prefix_idx using hash (key_prefix)
+  }
+
+  collection ApiKeyPrefixes {
+    id: text
+    api_key_id: uuid
+    tenant_id: text
+    created_at: datetime
+    index tenant_prefix_idx using hash (tenant_id)
+  }
+
+  collection ApiKeyAuditEvents {
+    id: uuid
+    type: text
+    credential_id: uuid
+    tenant_id: text
+    principal_id: text
+    timestamp: datetime
+    result: text
+    index tenant_timestamp_idx using hash (tenant_id)
+  }
+
+  collection WebhookEndpoints {
+    id: uuid
+    tenant_id: text
+    url: url
+    events: text
+    created_at: datetime
+    created_by: text
+    disabled_at: datetime
+    index tenant_idx using hash (tenant_id)
+  }
+
+  collection WebhookDeliveries {
+    id: uuid
+    tenant_id: text
+    endpoint_id: uuid
+    event_id: uuid
+    event_type: text
+    payload: json
+    status: text
+    attempt_count: integer
+    next_attempt_at: datetime
+    created_at: datetime
+    last_attempt_at: datetime
+    delivered_at: datetime
+    last_status_code: integer
+    last_error: text
+    index tenant_idx using hash (tenant_id)
+    index endpoint_idx using hash (endpoint_id)
+    index status_idx using hash (status)
+  }
+
+  collection WebhookAuditEvents {
+    id: uuid
+    type: text
+    endpoint_id: uuid
+    delivery_id: uuid
+    tenant_id: text
+    principal_id: text
+    timestamp: datetime
+    result: text
+    index tenant_idx using hash (tenant_id)
+  }
+
+  collection Jobs {
+    id: uuid
+    tenant_id: text
+    type: text
+    payload: json
+    status: text
+    run_at: datetime
+    attempt_count: integer
+    max_attempts: integer
+    created_at: datetime
+    started_at: datetime
+    completed_at: datetime
+    next_attempt_at: datetime
+    lease_owner: text
+    lease_expires_at: datetime
+    last_error: text
+    index tenant_idx using hash (tenant_id)
+    index status_idx using hash (status)
+    index runAt_idx using sorted (run_at)
+  }
+
+  collection JobSchedules {
+    id: uuid
+    tenant_id: text
+    type: text
+    payload: json
+    interval: text
+    next_run_at: datetime
+    enabled: boolean
+    created_at: datetime
+    created_by: text
+    index tenant_idx using hash (tenant_id)
+    index enabled_idx using hash (enabled)
+    index nextRunAt_idx using sorted (next_run_at)
+  }
+
+  collection JobAuditEvents {
+    id: uuid
+    type: text
+    job_id: uuid
+    schedule_id: uuid
+    tenant_id: text
+    principal_id: text
+    timestamp: datetime
+    result: text
+    details: json
+    index tenant_idx using hash (tenant_id)
+  }
+
+  collection Orders {
+    id: uuid
+    tenant_id: text
+    product: text
+    quantity: integer
+    status: text
+    created_at: datetime
+    created_by: text
+    authorization_id: uuid
+    job_id: uuid
+    index tenant_created_idx using hash (tenant_id, created_at)
+    index status_idx using hash status
+  }
+
+  collection AuthSessions {
+    id: uuid
+    tenant_id: text
+    principal_id: text
+    principal_kind: text
+    claims: json
+    delegation: json?
+    created_at: datetime
+    expires_at: datetime
+    index tenant_principal_idx using hash (tenant_id, principal_id)
+  }
+
+  collection AuthorizationEvidence {
+    id: uuid
+    tenant_id: text
+    capability: text
+    allowed: boolean
+    policy: text
+    principal_id: text
+    principal_kind: text
+    session_id: uuid?
+    claims: json
+    delegation: json?
+    effect: text
+    reason: text
+    resource_id: uuid?
+    job_id: uuid?
+    input: json
+    created_at: datetime
+    index tenant_created_idx using hash (tenant_id, created_at)
+  }
+
+  capability orders_read {
+    protocol "orders.read"
+    actor "demo.order_manager"
+    actor "demo.viewer"
+    effect read Orders
+  }
+
+  capability orders_create {
+    protocol "orders.create"
+    actor "demo.order_manager"
+    effect create Orders
+    uses "jobs.enqueue"
+    emits "orders.created"
+  }
+
+  capability orders_update {
+    protocol "orders.update"
+    actor "demo.order_manager"
+    effect update Orders
+  }
+
+  agent demo_order_manager {
+    principal "demo.order_manager"
+    kind human
+    label "Order Manager"
+    claim role=manager
+    claim tier=trusted
+  }
+
+  agent demo_viewer {
+    principal "demo.viewer"
+    kind human
+    label "Viewer"
+    claim role=viewer
+    claim tier=read_only
+  }
+
+  policy orders_read_order_manager {
+    allow "orders.read" to "demo.order_manager"
+  }
+
+  policy orders_read_viewer {
+    allow "orders.read" to "demo.viewer"
+  }
+
+  policy orders_create_order_manager {
+    allow "orders.create" to "demo.order_manager"
+  }
+
+  policy orders_update_order_manager {
+    allow "orders.update" to "demo.order_manager"
+  }
+}

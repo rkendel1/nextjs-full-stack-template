@@ -1,0 +1,29 @@
+{
+  "name": "nextjs-full-stack-template",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@appport/services": "0.4.4",
+    "@authboundry/core": "1.15.3",
+    "@feltdb/core": "0.11.6",
+    "appport": "1.1.20",
+    "next": "16.3.6",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "runora": "1.0.18"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "7.0.2",
+    "vitest": "5.0.1"
+  }
+}
